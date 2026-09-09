@@ -131,7 +131,7 @@ function createPitchLegacy() {
   let s = p.slides.add();
   s.background.fill = C.dark;
   rect(s, 72, 78, 12, 500, C.blue);
-  textBox(s, "MelodIA", 118, 105, 930, 92, { size: 72, bold: true, color: C.paper });
+  textBox(s, "SyntonIA", 118, 105, 930, 92, { size: 72, bold: true, color: C.paper });
   textBox(s, "Agente de Recomendação Musical", 122, 205, 860, 50, {
     size: 30,
     color: C.warm,
@@ -143,7 +143,7 @@ function createPitchLegacy() {
   });
   badge(s, "PITCH · 5 MIN", 122, 500, 190, C.blue);
   textBox(s, "Grupo 8", 1000, 615, 180, 34, { size: 20, color: "#C7C2B8", align: "right" });
-  note(s, "00:15", "Apresente o nome MelodIA e a promessa: uma conversa simples que leva a sugestões verificáveis.", "docs/apresentacao/ROTEIRO_PITCH.md");
+  note(s, "00:15", "Apresente o nome SyntonIA e a promessa: uma conversa simples que leva a sugestões verificáveis.", "docs/apresentacao/ROTEIRO_PITCH.md");
 
   // 2 — problema
   s = baseSlide(p, "Descobrir música não deveria virar trabalho", "O problema", 2);
@@ -164,12 +164,12 @@ function createPitchLegacy() {
     textBox(s, head, x + 28, 315, 294, 42, { size: 28, bold: true });
     textBox(s, body, x + 28, 370, 294, 92, { size: 22, color: C.muted });
   });
-  textBox(s, "O espaço em branco entre intenção e catálogo é onde o MelodIA atua.", 110, 545, 1060, 50, {
+  textBox(s, "O espaço em branco entre intenção e catálogo é onde o SyntonIA atua.", 110, 545, 1060, 50, {
     size: 26,
     bold: true,
     align: "center",
   });
-  addFooter(s, "MelodIA · descoberta por conversa");
+  addFooter(s, "SyntonIA · descoberta por conversa");
   note(s, "00:35", "Parta do pedido cotidiano e mostre três atritos: procurar, confiar e entender.", "analise_mercado_streaming/RELATORIO.md; docs/apresentacao/ROTEIRO_PITCH.md");
 
   // 3 — mercado
@@ -277,7 +277,7 @@ function createPitchLegacy() {
   textBox(s, "Você: quero um pagode animado", 150, 228, 410, 50, { size: 25, bold: true, color: C.ink });
   textBox(s, "→", 610, 220, 50, 60, { size: 42, bold: true, color: C.blue, align: "center" });
   rect(s, 685, 205, 460, 205, C.dark, 18);
-  textBox(s, "MelodIA", 718, 224, 180, 38, { size: 25, bold: true, color: C.warm });
+  textBox(s, "SyntonIA", 718, 224, 180, 38, { size: 25, bold: true, color: C.warm });
   textBox(s, "3 faixas do catálogo\n+ motivo da escolha\n+ filtros aplicados", 718, 278, 380, 110, { size: 26, color: C.paper });
   badge(s, "SEM LLM", 173, 360, 148, C.blue);
   badge(s, "SEM OAUTH", 342, 360, 168, C.blue);
@@ -290,7 +290,7 @@ function createPitchLegacy() {
   note(s, "01:05", "Digite o cenário combinado, mostre as faixas e explique por que a resposta continua funcionando sem LLM e sem Spotify.", "docs/apresentacao/ENSAIO_GERAL.md; docs/apresentacao/video/GUIA_GRAVACAO.md");
 
   // 8 — fechamento
-  s = baseSlide(p, "MelodIA transforma intenção em descoberta confiável", "Fechamento", 8, true);
+  s = baseSlide(p, "SyntonIA transforma intenção em descoberta confiável", "Fechamento", 8, true);
   const claims = [
     ["Natural", "pedido em linguagem comum"],
     ["Confiável", "faixas vêm do catálogo"],
@@ -367,9 +367,9 @@ async function createPitch() {
   let s = p.slides.add();
   s.background.fill = P.cream;
   rect(s, 0, 0, 760, 720, P.forest);
-  textBox(s, "MelodIA", 84, 145, 590, 100, { size: 72, bold: true, color: P.paper });
+  textBox(s, "SyntonIA", 84, 145, 590, 100, { size: 72, bold: true, color: P.paper });
   textBox(s, "Recomendações musicais por conversa", 88, 252, 560, 46, { size: 29, color: "#E4EBDD" });
-  textBox(s, "Você descreve o que quer ouvir.\nO MelodIA encontra faixas reais e explica a escolha.", 88, 342, 570, 118, {
+  textBox(s, "Você descreve o que quer ouvir.\nO SyntonIA encontra faixas reais e explica a escolha.", 88, 342, 570, 118, {
     size: 29, bold: true, color: P.paper,
   });
   textBox(s, "Grupo 8 · Residência em Inteligência Artificial", 88, 568, 570, 32, {
@@ -380,7 +380,7 @@ async function createPitch() {
   });
   textBox(s, "M", 840, 155, 330, 340, { size: 220, bold: true, color: P.green, align: "center" });
   textBox(s, "conversa + catálogo", 840, 500, 330, 38, { size: 22, color: P.muted, align: "center" });
-  note(s, "00:10", "Apresente o MelodIA em uma frase: a pessoa descreve o que quer ouvir e recebe faixas reais com uma explicação curta.", "docs/apresentacao/ROTEIRO_PITCH.md");
+  note(s, "00:10", "Apresente o SyntonIA em uma frase: a pessoa descreve o que quer ouvir e recebe faixas reais com uma explicação curta.", "docs/apresentacao/ROTEIRO_PITCH.md");
 
   s = pitchBase("Como você escolhe o que ouvir?", 2);
   textBox(s, "Você já sabia o clima que queria, mas não sabia qual música colocar?", 72, 165, 1030, 42, {
@@ -601,7 +601,7 @@ async function createPitch() {
     left: 0, top: 0, width: 1280, height: 720,
   });
   rect(s, 0, 0, 1280, 720, `${P.forest}/86`);
-  textBox(s, "O que você pediria ao MelodIA?", 135, 190, 1010, 95, {
+  textBox(s, "O que você pediria ao SyntonIA?", 135, 190, 1010, 95, {
     size: 52, bold: true, color: P.paper, align: "center",
   });
   textBox(s, "Experimente o produto e compartilhe sua percepção.", 225, 320, 830, 58, {
@@ -621,7 +621,7 @@ async function createTechnical() {
   const p = Presentation.create({ slideSize: { width: 1280, height: 720 } });
   let s = p.slides.add();
   s.background.fill = C.dark;
-  textBox(s, "MelodIA", 88, 88, 420, 68, { size: 58, bold: true, color: C.paper });
+  textBox(s, "SyntonIA", 88, 88, 420, 68, { size: 58, bold: true, color: C.paper });
   textBox(s, "Arquitetura do agente\ne uso responsável de LLM", 88, 205, 920, 150, {
     size: 48,
     bold: true,
@@ -865,17 +865,17 @@ async function finalizeDeck(presentation, fileName, slideCount, charts, previewD
 
 const pitch = await createPitch();
 const technical = await createTechnical();
-await finalizeDeck(pitch, "MelodIA_Pitch.pptx", 14, [4, 12], PITCH_PREVIEW);
-await finalizeDeck(technical, "MelodIA_Tecnica.pptx", 10, [6], TECH_PREVIEW);
+await finalizeDeck(pitch, "SyntonIA_Pitch.pptx", 14, [4, 12], PITCH_PREVIEW);
+await finalizeDeck(technical, "SyntonIA_Tecnica.pptx", 10, [6], TECH_PREVIEW);
 
 const pdfResult = spawnSync(
   runtimePython,
   [
     path.join(repoDir, "scripts", "apresentacao", "build_pdfs.py"),
     "--pitch-preview", PITCH_PREVIEW,
-    "--pitch-pdf", path.join(OUTPUT, "pitch", "MelodIA_Pitch.pdf"),
+    "--pitch-pdf", path.join(OUTPUT, "pitch", "SyntonIA_Pitch.pdf"),
     "--tecnica-preview", TECH_PREVIEW,
-    "--tecnica-pdf", path.join(OUTPUT, "tecnica", "MelodIA_Tecnica.pdf"),
+    "--tecnica-pdf", path.join(OUTPUT, "tecnica", "SyntonIA_Tecnica.pdf"),
   ],
   { stdio: "inherit" },
 );

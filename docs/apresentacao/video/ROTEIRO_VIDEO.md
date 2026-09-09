@@ -1,6 +1,6 @@
 # Roteiro do vídeo — 5 minutos
 
-O vídeo apresenta o MelodIA com linguagem direta, demonstra o fluxo principal
+O vídeo apresenta o SyntonIA com linguagem direta, demonstra o fluxo principal
 e fecha com a arquitetura responsável. A narração abaixo foi dimensionada para
 cerca de cinco minutos em ritmo natural, com pausas curtas entre pessoas.
 
@@ -8,7 +8,7 @@ cerca de cinco minutos em ritmo natural, com pausas curtas entre pessoas.
 
 | Cena | Tempo | Duração | Responsável | Conteúdo na tela | Corte |
 | ---: | --- | ---: | --- | --- | --- |
-| 1 | 00:00–00:20 | 20 s | Pessoa 1 | Câmera e capa do MelodIA | Entrada suave para o slide 1 |
+| 1 | 00:00–00:20 | 20 s | Pessoa 1 | Câmera e capa do SyntonIA | Entrada suave para o slide 1 |
 | 2 | 00:20–00:55 | 35 s | Pessoa 2 | Problema e exemplos de pedidos | Aproximação no texto principal |
 | 3 | 00:55–01:35 | 40 s | Pessoa 3 | Gráfico Brasil versus mundo | Corte seco para o gráfico |
 | 4 | 01:35–02:20 | 45 s | Pessoa 4 | Jornada da conversa | Elementos entram na ordem do fluxo |
@@ -23,7 +23,7 @@ cerca de cinco minutos em ritmo natural, com pausas curtas entre pessoas.
 ### Cena 1 — Pessoa 1 — 00:00 a 00:20
 
 “Encontrar uma música parece simples até o momento em que o pedido foge de uma
-playlist pronta. O MelodIA é um agente de recomendação musical criado pelo
+playlist pronta. O SyntonIA é um agente de recomendação musical criado pelo
 Grupo 8 da Residência em Inteligência Artificial. Ele transforma uma conversa
 curta em uma lista de músicas reais, com critérios que podem ser explicados.”
 
@@ -86,7 +86,7 @@ com menos 0,742. Nenhuma característica isolada explica a popularidade.”
 
 ### Cena 8 — Pessoa 1 — 04:30 a 05:00
 
-“O MelodIA reúne uma interface simples, uma busca verificável e uso controlado
+“O SyntonIA reúne uma interface simples, uma busca verificável e uso controlado
 de inteligência artificial. O próximo passo é aprender com interações reais e
 evoluir a personalização sem perder transparência. O repositório documenta os
 dados, a arquitetura, os testes e as limitações conhecidas. Essa base permite

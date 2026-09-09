@@ -1,4 +1,4 @@
-# Apresentação do MelodIA
+# Apresentação do SyntonIA
 
 Este diretório reúne o material do Épico 11. O conteúdo foi escrito para ser
 usado por quem vai apresentar e também por quem precisa avaliar o projeto sem
@@ -8,9 +8,9 @@ conhecer o código.
 
 | Ticket | Entrega | Situação |
 | --- | --- | --- |
-| KAN-97 / 11.1 | `pitch/MelodIA_Pitch.pptx`, PDF e `ROTEIRO_PITCH.md` | Pronto para apresentar |
+| KAN-97 / 11.1 | `pitch/SyntonIA_Pitch.pptx`, PDF e `ROTEIRO_PITCH.md` | Pronto para apresentar — pendente rebuild com o nome novo |
 | KAN-98 / 11.2 | Pacote de gravação em `video/` | Gravação e publicação dependem da equipe |
-| KAN-99 / 11.3 | `tecnica/MelodIA_Tecnica.pptx`, PDF e `ROTEIRO_TECNICO.md` | Pronto para apresentar |
+| KAN-99 / 11.3 | `tecnica/SyntonIA_Tecnica.pptx`, PDF e `ROTEIRO_TECNICO.md` | Pronto para apresentar — pendente rebuild com o nome novo |
 | KAN-101 / 11.5 | `ENSAIO_GERAL.md` | Roteiro pronto; execução deve ser registrada pela equipe |
 | KAN-102 / 11.6 | `video/ROTEIRO_VIDEO.md` | Pronto para gravação |
 
@@ -44,7 +44,10 @@ tratam essas duas datas como fotografias diferentes do projeto.
 
 ## Como reconstruir os arquivos
 
-No Windows com o ambiente do Codex instalado, execute na raiz do repositório:
+Os slides internos dos PPTX/PDF ainda mostram "MelodIA" — o texto do deck só
+muda reconstruindo os arquivos (o rename de texto/scripts feito neste commit
+não altera o conteúdo binário já gerado). No Windows com o ambiente do Codex
+instalado, execute na raiz do repositório:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/apresentacao/build_decks.ps1

@@ -40,14 +40,14 @@ $env:RUNTIME_PYTHON = $runtimePython
 $nodeExitCode = $LASTEXITCODE
 
 $expectedOutputs = @(
-    (Join-Path $repoDir "docs\apresentacao\pitch\MelodIA_Pitch.pptx"),
-    (Join-Path $repoDir "docs\apresentacao\pitch\MelodIA_Pitch.pdf"),
-    (Join-Path $repoDir "docs\apresentacao\tecnica\MelodIA_Tecnica.pptx"),
-    (Join-Path $repoDir "docs\apresentacao\tecnica\MelodIA_Tecnica.pdf")
+    (Join-Path $repoDir "docs\apresentacao\pitch\SyntonIA_Pitch.pptx"),
+    (Join-Path $repoDir "docs\apresentacao\pitch\SyntonIA_Pitch.pdf"),
+    (Join-Path $repoDir "docs\apresentacao\tecnica\SyntonIA_Tecnica.pptx"),
+    (Join-Path $repoDir "docs\apresentacao\tecnica\SyntonIA_Tecnica.pdf")
 )
 $receipts = @(
-    (Join-Path $repoDir ".presentation-build\MelodIA_Pitch\MelodIA_Pitch.pptx.validation.json"),
-    (Join-Path $repoDir ".presentation-build\MelodIA_Tecnica\MelodIA_Tecnica.pptx.validation.json")
+    (Join-Path $repoDir ".presentation-build\SyntonIA_Pitch\SyntonIA_Pitch.pptx.validation.json"),
+    (Join-Path $repoDir ".presentation-build\SyntonIA_Tecnica\SyntonIA_Tecnica.pptx.validation.json")
 )
 
 $missing = $expectedOutputs | Where-Object { -not (Test-Path -LiteralPath $_) }

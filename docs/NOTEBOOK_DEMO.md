@@ -4,8 +4,8 @@ O arquivo `analise_exploratoria.ipynb` é o material de demonstração da análi
 
 ## Abrir online
 
-- [Visualizar no GitHub](https://github.com/Lucas-AV/Grupo-8-ResIA/blob/main/analise_exploratoria.ipynb): leitura dos resultados já salvos no arquivo.
-- [Abrir no Binder](https://mybinder.org/v2/gh/Lucas-AV/Grupo-8-ResIA/HEAD?labpath=analise_exploratoria.ipynb): ambiente temporário no navegador para executar as células. A primeira abertura pode levar alguns minutos enquanto o ambiente é preparado.
+- [Visualizar no GitHub](https://github.com/Lucas-AV/SyntonIA/blob/main/analise_exploratoria.ipynb): leitura dos resultados já salvos no arquivo.
+- [Abrir no Binder](https://mybinder.org/v2/gh/Lucas-AV/SyntonIA/HEAD?labpath=analise_exploratoria.ipynb): ambiente temporário no navegador para executar as células. A primeira abertura pode levar alguns minutos enquanto o ambiente é preparado.
 
 No Binder, selecione uma célula e use **Shift + Enter**. Para executar tudo, use o menu `Run` → `Run All Cells`.
 

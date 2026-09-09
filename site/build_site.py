@@ -54,7 +54,7 @@ MARKET_PNGS = [
 ]
 MARKET_REPORT_PDF = MARKET_DIR / "relatorio-sinal-do-streaming.pdf"
 
-REPO_URL = "https://github.com/Lucas-AV/Grupo-8-ResIA"
+REPO_URL = "https://github.com/Lucas-AV/SyntonIA"
 # Ainda nao ha hospedagem publica do agente (Epico 8, ticket 8.7, bloqueado —
 # ver agente_conversacional/README.md): o CTA "Testar o Agente" do ticket
 # 12.6 linka pro passo a passo de como rodar localmente, nao pra um demo ao vivo.
@@ -102,7 +102,7 @@ def build_pitch_cards(profile: dict) -> list[dict]:
         {
             "label": "A solucao — arquitetura definida",
             "body": (
-                "O MelodIA entende o pedido com regras e LLM, mas escolhe as "
+                "O SyntonIA entende o pedido com regras e LLM, mas escolhe as "
                 "faixas por uma busca controlada em Python. A resposta so pode "
                 "citar musicas realmente devolvidas pelo catalogo."
             ),

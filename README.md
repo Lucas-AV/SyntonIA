@@ -1,36 +1,310 @@
-# Grupo 8 — ResIA: Agente de Recomendação de Músicas
+# SyntonIA — Agente de Recomendação Musical (Grupo 8 — ResIA)
 
 [![Licença: MIT](https://img.shields.io/badge/Licença-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](requirements.txt)
+[![Testes do agente](https://github.com/Lucas-AV/SyntonIA/actions/workflows/agente-tests.yml/badge.svg)](.github/workflows/agente-tests.yml)
+[![GitHub Pages](https://github.com/Lucas-AV/SyntonIA/actions/workflows/pages.yml/badge.svg)](.github/workflows/pages.yml)
 
-Projeto da disciplina ResIA (Grupo 8): um agente de recomendação de músicas e
-playlists construído a partir de análise de dados do Spotify. O repositório
-hoje concentra a etapa de análise exploratória de dados (EDA) que fundamenta o
-agente — entendimento de gêneros, popularidade e características de áudio das
-faixas — e evolui para as etapas de modelagem e recomendação.
+Projeto da disciplina ResIA (Grupo 8): um **agente conversacional de
+recomendação de músicas** que conversa em linguagem natural, entende o
+pedido do usuário (gênero, humor, energia, artista de referência...),
+personaliza a recomendação com o histórico real do Spotify de quem está
+logado e permite salvar o resultado direto numa playlist do Spotify. O
+projeto nasceu de uma análise exploratória de um dataset de faixas do
+Spotify e evoluiu para um produto completo: backend + frontend do agente,
+motor de recomendação por similaridade, integração OAuth com o Spotify,
+IA generativa local (Ollama) com alternativa hospedada (Claude), e um
+dashboard público com as análises de dados e o pitch do projeto.
 
-> **About (EN):** ResIA (Grupo 8) course project — a music/playlist
-> recommendation agent built from exploratory analysis of a Spotify tracks
-> dataset (genre, popularity, and audio features). Currently in the EDA
-> stage; recommendation modeling is next.
+> **About (EN):** ResIA (Grupo 8) course project — a conversational music
+> recommendation agent. It understands natural-language requests (genre,
+> mood, energy, reference artist...), personalizes results using the
+> user's real Spotify listening history via OAuth, and can save the
+> recommendation as a real Spotify playlist. Built on top of a content-based
+> recommendation engine (cosine similarity over Spotify audio features),
+> with local LLM inference (Ollama) and an optional hosted backend
+> (Claude).
 
+**Site publicado (dashboard + landing):** https://lucas-av.github.io/SyntonIA/
 **Quadro do Miro:** [Link do projeto](https://miro.com/app/board/uXjVHttBzWA=/)
 **Quadro do JIRA:** Link do Quadro
 
 ## Sumário
 
-- [Grupo 8 — ResIA: Agente de Recomendação de Músicas](#grupo-8--resia-agente-de-recomendação-de-músicas)
-  - [Sumário](#sumário)
-  - [Equipe](#equipe)
-  - [Sugestões de nome do projeto](#sugestões-de-nome-do-projeto)
-  - [Base de dados](#base-de-dados)
-  - [Estrutura do repositório](#estrutura-do-repositório)
-  - [Arquitetura do agente conversacional (Proposta B)](#arquitetura-do-agente-conversacional-proposta-b)
-  - [Análises disponíveis](#análises-disponíveis)
-  - [Bibliotecas](#bibliotecas)
-  - [Como reproduzir](#como-reproduzir)
-  - [Roadmap](#roadmap)
-  - [Licença](#licença)
+- [O que o projeto faz](#o-que-o-projeto-faz)
+- [Como funciona (arquitetura resumida)](#como-funciona-arquitetura-resumida)
+- [Tecnologias](#tecnologias)
+- [Integrações externas](#integrações-externas)
+- [Como rodar](#como-rodar)
+  - [Agente conversacional (produto principal)](#agente-conversacional-produto-principal)
+  - [Explorador Spotify (ferramenta de dev)](#explorador-spotify-ferramenta-de-dev)
+  - [Análise exploratória e dashboard](#análise-exploratória-e-dashboard)
+  - [Análise de mercado (Julia)](#análise-de-mercado-julia)
+- [Testes e CI/CD](#testes-e-cicd)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Base de dados](#base-de-dados)
+- [Análises disponíveis no dashboard](#análises-disponíveis-no-dashboard)
+- [Documentação e apresentação](#documentação-e-apresentação)
+- [Equipe](#equipe)
+- [Roadmap](#roadmap)
+- [Licença](#licença)
+
+## O que o projeto faz
+
+O produto é o **agente conversacional** (pasta [`agente_conversacional/`](agente_conversacional/)):
+
+- **Chat em linguagem natural** — pede recomendação por texto livre
+  ("quero um pagode animado", "algo triste pra relaxar") e recebe faixas
+  reais com nome, artista e capa.
+- **Preview de áudio de 30s** em cada faixa, com fallback automático pro
+  YouTube quando o Spotify não fornece prévia.
+- **Login com Spotify** (OAuth PKCE) — inclusive **por QR code**, pra
+  cenário de demo/kiosk (escaneia com o celular e autoriza sem digitar
+  nada no computador da apresentação).
+- **Personalização real**: com o usuário logado, o agente monta um
+  "perfil de gosto" a partir do histórico de escuta do Spotify (top
+  tracks, faixas curtidas, tocadas recentemente) e usa isso pra enviesar
+  a recomendação.
+- **Painel "Meu Perfil"** com os dados da conta Spotify conectada.
+- **Painel "Explorar Spotify"** — busca, lançamentos recentes, minhas
+  playlists, quem eu sigo, meus dados de audição e um player com
+  controles reais (play/pause/próxima/anterior/volume/shuffle/repeat/fila).
+- **Salvar no Spotify** — cria de verdade uma playlist na conta do usuário
+  com as faixas recomendadas.
+- **"Gerar outra recomendação"**, sem repetir faixas já mostradas na
+  sessão; **dark mode**; landing page do projeto.
+- Endpoint `GET /recomendar` pra pedir recomendação direto, sem passar
+  pelo LLM (útil pra demo/debug).
+
+O repositório também guarda o trabalho que fundamentou o produto: a
+análise exploratória do dataset de faixas, a análise de mercado de
+streaming (pitch de investimento) e um dashboard público com tudo isso.
+
+## Como funciona (arquitetura resumida)
+
+Um turno de conversa passa por um pipeline em etapas — cada etapa é
+determinística sempre que possível, e só usa o modelo de linguagem (LLM)
+onde regra fixa não resolve:
+
+```
+mensagem do usuário
+   -> roteador determinístico (regex; resolve pedidos simples direto)
+   -> extração estruturada via LLM (pedidos livres/longos)
+   -> validação de schema (gênero/artista contra o dataset real)
+   -> busca no motor de recomendação (similaridade por cosseno,
+      + perfil de gosto do usuário logado, blend 70/30)
+   -> geração da resposta guiada por LLM (ou template determinístico
+      de fallback, se o LLM falhar/estiver indisponível)
+   -> auditoria mecânica: filtra qualquer faixa citada pelo LLM que
+      não veio de fato da busca
+```
+
+Especificação técnica completa (ciclo de vida do agente, fluxo OAuth,
+contratos entre componentes, casos de uso e edge cases):
+[`docs/PIPELINE_AGENTE_PROPOSTA_B.md`](docs/PIPELINE_AGENTE_PROPOSTA_B.md).
+Backlog em épicos/tickets: [`docs/BACKLOG_JIRA_PROPOSTA_B.md`](docs/BACKLOG_JIRA_PROPOSTA_B.md).
+
+## Tecnologias
+
+| Camada | Tecnologia | Onde |
+|---|---|---|
+| Backend do agente | Python 3.12, **FastAPI**, uvicorn | [`agente_conversacional/`](agente_conversacional/) |
+| Frontend do agente | HTML/CSS/JS puro (sem framework/bundler, deliberado) | [`agente_conversacional/frontend/`](agente_conversacional/frontend/) |
+| Motor de recomendação | pandas + NumPy — índice de similaridade por cosseno sobre 9 features de áudio normalizadas | `agente_conversacional/recomendacao/` |
+| IA generativa | **Ollama** (local, `qwen2.5:7b-instruct-q4_K_M`) por padrão; **Claude/Anthropic** como backend hospedado alternativo | `agente_conversacional/llm/` |
+| Autenticação/tokens | OAuth 2.0 Authorization Code + PKCE; tokens criptografados (`cryptography.Fernet`) em SQLite | `agente_conversacional/spotify_auth/` |
+| Persistência | SQLite local (sessões de tokens); sessões de conversa em memória | `agente_conversacional/` |
+| Ferramenta de dev | Flask (backend) + **Vue 3** + Vite (frontend) — explorador da Web API do Spotify | [`spotify_explorer/`](spotify_explorer/) |
+| Análise de dados / EDA | pandas, matplotlib, adjustText, JupyterLab | raiz do repo, `scripts/`, `analise_exploratoria.ipynb` |
+| Site / dashboard | Jinja2 (gera HTML estático), publicado via GitHub Pages | [`site/`](site/) |
+| Análise de mercado | **Julia** (`CSV.jl`, `DataFrames.jl`, `Plots.jl`) — stack isolada de propósito | [`analise_mercado_streaming/`](analise_mercado_streaming/) |
+| Testes | pytest (backend do agente: 303 testes; explorer; EDA/site) | `agente_conversacional/`, `spotify_explorer/`, `tests/` |
+| CI/CD | GitHub Actions — testes do agente, validação do notebook, deploy do GitHub Pages | [`.github/workflows/`](.github/workflows/) |
+
+Não há banco de dados externo nem Docker/docker-compose — tudo roda
+localmente com SQLite e os servidores de desenvolvimento de cada stack.
+
+## Integrações externas
+
+| Integração | Uso | Variáveis de ambiente |
+|---|---|---|
+| **Spotify Web API** (OAuth PKCE) | Login do usuário, histórico de escuta, perfil de gosto, criar playlist, painel "Explorar Spotify", player | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_TOKEN_ENCRYPTION_KEY`, `SPOTIFY_TOKEN_DB_PATH` (em [`agente_conversacional/.env.example`](agente_conversacional/.env.example)) |
+| **Spotify Web API** (Client Credentials) | Fallback de busca quando o dataset local não cobre o gênero/artista pedido, sem exigir login | mesma app do Spotify acima |
+| **Ollama** (LLM local) | Backend padrão de IA generativa — roteamento, extração e geração de texto | `LLM_BACKEND=ollama`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_NUM_CTX`, `OLLAMA_NUM_PREDICT` |
+| **Claude / Anthropic API** | Backend de IA generativa alternativo (hospedado, sem depender de GPU local) | `LLM_BACKEND=claude`, `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` |
+| **YouTube Data API v3** | Fallback de preview de áudio quando o Spotify não devolve `preview_url` | `YOUTUBE_API_KEY` |
+
+Registre o app no [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+pra obter as credenciais do Spotify. As chaves de LLM/YouTube são
+opcionais — sem elas, o agente funciona com Ollama local e sem preview
+via YouTube.
+
+## Como rodar
+
+### Agente conversacional (produto principal)
+
+Pré-requisito pro backend de LLM local: [Ollama](https://ollama.com) instalado.
+
+```bash
+ollama pull qwen2.5:7b-instruct-q4_K_M
+
+cd agente_conversacional
+pip install -r requirements.txt
+cp .env.example .env      # edite SPOTIFY_*/ANTHROPIC_API_KEY/YOUTUBE_API_KEY conforme necessário
+uvicorn app:app --reload  # backend em http://127.0.0.1:8000
+```
+
+Frontend (PowerShell):
+
+```powershell
+cd agente_conversacional/frontend
+.\serve.ps1    # http://127.0.0.1:8080 (porta configurável: -Port)
+```
+
+Detalhes de setup, endpoints, CORS, rate limiting e status por épico:
+[`agente_conversacional/README.md`](agente_conversacional/README.md).
+
+### Explorador Spotify (ferramenta de dev)
+
+Ferramenta interna usada para explorar/documentar a Web API do Spotify
+antes de portar as funcionalidades pro produto — não faz parte do produto
+final.
+
+```bash
+cd spotify_explorer
+cp .env.example .env
+pip install -r requirements.txt -r spotify_explorer/requirements.txt   # rodar a partir da raiz do repo
+cd frontend && npm install && npm run build && cd ..
+python app.py   # http://127.0.0.1:5000
+```
+
+Detalhes: [`spotify_explorer/README.md`](spotify_explorer/README.md).
+
+### Análise exploratória e dashboard
+
+```bash
+pip install -r requirements.txt
+python scripts/group_occurrences.py
+python scripts/plot_genre_charts.py
+python scripts/plot_genre_mode.py
+python scripts/plot_popularity_occurrences.py
+python scripts/profile_dataset.py
+python scripts/plot_correlations.py
+python site/build_site.py                     # gera site/dist/ (abrir site/dist/index.html)
+jupyter lab analise_exploratoria.ipynb         # abre o notebook de EDA
+```
+
+Notebook pronto pra demonstração guiada célula a célula — veja
+[`docs/NOTEBOOK_DEMO.md`](docs/NOTEBOOK_DEMO.md) ou abra direto pelo
+[Binder](https://mybinder.org/v2/gh/Lucas-AV/SyntonIA/HEAD?labpath=analise_exploratoria.ipynb),
+sem preparar ambiente local.
+
+### Análise de mercado (Julia)
+
+```bash
+cd analise_mercado_streaming
+julia setup.jl && julia analise_mercado.jl
+```
+
+Stack isolada de propósito (Julia, não Python) — relatório completo com
+proveniência de cada número em
+[`analise_mercado_streaming/RELATORIO.md`](analise_mercado_streaming/RELATORIO.md).
+Versão publicada: [Mercado de Streaming](https://lucas-av.github.io/SyntonIA/mercado.html).
+
+## Testes e CI/CD
+
+```bash
+pytest                              # raiz: EDA/site
+cd agente_conversacional && pytest  # 303 testes — LLM e Spotify sempre mockados
+cd spotify_explorer && pytest       # requests mockado
+```
+
+Três workflows de GitHub Actions rodam automaticamente:
+
+- [`agente-tests.yml`](.github/workflows/agente-tests.yml) — testes do
+  agente em todo push/PR que toque `agente_conversacional/`.
+- [`notebook-demo.yml`](.github/workflows/notebook-demo.yml) — valida o
+  notebook de demonstração em PRs que toquem notebook/scripts/tests.
+- [`pages.yml`](.github/workflows/pages.yml) — build e deploy do
+  dashboard estático no GitHub Pages a cada push em `main`.
+
+## Estrutura do repositório
+
+```
+agente_conversacional/          # PRODUTO: backend FastAPI + frontend do agente
+  app.py                          # entrypoint FastAPI
+  chat/                           # pipeline conversacional (roteador, extração, geração, auditoria)
+  recomendacao/                   # motor de recomendação (dataset, índice por cosseno, busca, perfil)
+  llm/                            # abstração de LLM (backends Ollama e Claude)
+  spotify_auth/                   # OAuth PKCE, tokens, histórico, playlist, painel "Explorar Spotify", QR login
+  api/, sessions/                 # sessões de conversa e endpoints HTTP
+  frontend/                       # HTML/CSS/JS puro (chat, Meu Perfil, Explorar Spotify)
+spotify_explorer/                # ferramenta de dev: Flask + Vue/Vite pra explorar a Web API do Spotify
+analise_mercado_streaming/       # análise de mercado do pitch, em Julia (stack separada)
+data/                             # raw/, processed/ (dataset.csv consolidado), analytics/, hygiene/
+scripts/                          # scripts Python de análise/gráficos (EDA)
+site/                             # gerador do dashboard estático (build_site.py, templates/, static/)
+docs/                             # spec técnica, backlog Jira, apresentação, pesquisa
+tests/                            # testes pytest do nível raiz (EDA/site)
+analise_exploratoria.ipynb        # notebook principal de EDA
+requirements.txt                  # dependências Python do nível raiz (EDA/site)
+.github/workflows/                # CI (testes do agente, notebook, deploy do Pages)
+```
+
+## Base de dados
+
+Dataset: [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset) (Kaggle).
+
+`data/processed/dataset.csv` contém uma base ampliada de faixas e gêneros
+(128.830 registros, 97.534 faixas únicas), gerada a partir das fontes
+documentadas em `docs/data_enrichment/`.
+
+- Identificação: `track_id`, `artists`, `album_name`, `track_name`, `track_genre`
+- Popularidade: `popularity`
+- Características de áudio: `danceability`, `energy`, `loudness`, `speechiness`,
+  `acousticness`, `instrumentalness`, `liveness`, `valence`, `tempo`,
+  `duration_ms`, `key`, `mode`, `time_signature`, `explicit`
+
+> Limitação conhecida: o dataset não traz histórico de escuta/feedback
+> por usuário, só metadados e popularidade agregada da faixa — por isso a
+> personalização real do agente usa o histórico do Spotify de quem loga
+> (Épico 5), e não colaboração entre usuários do dataset.
+
+## Análises disponíveis no dashboard
+
+Publicadas em https://lucas-av.github.io/SyntonIA/:
+
+- **Popularidade por gênero** — gênero mais popular: *chill* (53,7 de
+  popularidade média).
+- **Energia × dançabilidade por gênero** — mais energético: *death-metal*
+  (0,93); menos energético: *classical* (0,19); mais dançável:
+  *chicago-house* (0,77).
+- **Escala maior vs. menor por gênero** — maior predominância de escala
+  maior: *country* (89%); de escala menor: *deep-house* (54%).
+- **Popularidade × volume de catálogo do artista**.
+- **Perfil geral do dataset** — contagem de faixas/artistas/álbuns/gêneros,
+  duplicidade entre gêneros, distribuição por artista/álbum.
+- **Correlação de Pearson** entre popularidade, duração e as 9 features
+  de áudio contínuas.
+- **Precisão do motor de similaridade por cosseno** e **métodos
+  alternativos de recomendação** (colaborativo/híbrido) — páginas que
+  documentam a escolha do método atual e o que ficaria pra uma próxima
+  iteração.
+- **Análise de mercado de streaming** (Julia) e o **notebook de EDA**
+  embutidos no próprio dashboard.
+
+## Documentação e apresentação
+
+- [`docs/PIPELINE_AGENTE_PROPOSTA_B.md`](docs/PIPELINE_AGENTE_PROPOSTA_B.md) —
+  especificação técnica completa do agente.
+- [`docs/BACKLOG_JIRA_PROPOSTA_B.md`](docs/BACKLOG_JIRA_PROPOSTA_B.md) —
+  backlog em épicos/tickets.
+- [`docs/apresentacao/`](docs/apresentacao/README.md) — pitch de 5 minutos,
+  apresentação técnica de 8 minutos (PPTX/PDF), roteiros e guia de ensaio
+  do projeto (arquivos já renomeados pra SyntonIA; o conteúdo interno dos
+  slides ainda diz MelodIA até alguém rodar o rebuild dos decks).
+- [`docs/NOTEBOOK_DEMO.md`](docs/NOTEBOOK_DEMO.md) — roteiro de demonstração
+  do notebook de EDA.
 
 ## Equipe
 
@@ -69,207 +343,42 @@ faixas — e evolui para as etapas de modelagem e recomendação.
 </tr>
 </table>
 
-## Sugestões de nome do projeto
-
-Candidatos para renomear o repositório (estilo: termo de música/áudio +
-sufixo tech como Sense/IA):
-
-- AudioSense
-- MelodIA
-- TuneSense
-- RitmIA
-- GrooveIA
-- HarmonIA
-- MoodSense
-
-## Base de dados
-
-Dataset: [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset) (Kaggle).
-
-`data/processed/dataset.csv` contém uma base ampliada de faixas e gêneros, gerada a partir das
-fontes documentadas em `docs/data_enrichment/`.
-
-- Identificação: `track_id`, `artists`, `album_name`, `track_name`, `track_genre`
-- Popularidade: `popularity`
-- Características de áudio: `danceability`, `energy`, `loudness`, `speechiness`,
-  `acousticness`, `instrumentalness`, `liveness`, `valence`, `tempo`,
-  `duration_ms`, `key`, `mode`, `time_signature`, `explicit`
-
-> Utilizar outros datasets para lidar com limitações: "Avaliação dos usuários"
-> (o dataset atual não traz histórico de escuta/feedback por usuário, apenas
-> metadados e popularidade agregada da faixa).
-
-## Estrutura do repositório
-
-```
-analise_exploratoria.ipynb     # notebook que concentra a EDA (mesma logica dos scripts abaixo, saida inline)
-data/                           # fontes e artefatos do pipeline
-  raw/                          # CSVs originais baixados das fontes
-  processed/                    # fontes normalizadas e dataset.csv consolidado
-  analytics/                    # CSVs/JSON derivados para análises e site
-  hygiene/                      # validações, proveniência e rejeições
-images/                         # PNGs gerados pelos scripts de análise
-scripts/                        # scripts Python de análise
-  chart_style.py                 # estilo/cores compartilhados entre os scripts de gráfico
-  group_occurrences.py           # agrupa dataset.csv por coluna e por track_genre
-  plot_genre_charts.py           # gera genre_popularity.png e genre_energy_dance.png
-  plot_genre_mode.py             # gera genre_mode.png (proporção de escala maior/menor)
-  plot_popularity_occurrences.py # gera popularity_occurrences.png (popularidade x nº de faixas do artista)
-  profile_dataset.py             # gera dataset_profile.json e distribuições de faixas por artista/álbum
-  plot_correlations.py           # gera correlation_heatmap.png e correlations_top_pairs.csv
-site/                          # build do dashboard (build_site.py, templates/, static/)
-tests/                         # testes automatizados (pytest)
-  conftest.py                  # config do pytest (path do projeto)
-requirements.txt               # dependências Python
-.github/workflows/pages.yml    # workflow de deploy do site no GitHub Pages
-analise_mercado_streaming/     # análise de mercado do pitch, em Julia (stack separada, ver abaixo)
-agente_conversacional/         # backend + frontend do agente (Proposta B) — Épicos 0,1,3,4,5,8,12 (ver seção abaixo)
-docs/PIPELINE_AGENTE_PROPOSTA_B.md  # especificação técnica completa do pipeline conversacional
-docs/BACKLOG_JIRA_PROPOSTA_B.md     # backlog em tickets, 1 seção por épico do Jira
-```
-
-## Análise de mercado (Julia)
-
-A pasta [`analise_mercado_streaming/`](analise_mercado_streaming/) contém a
-análise do mercado de streaming de música (Spotify, IFPI, Pró-Música Brasil,
-MIDiA Research) que fundamenta o pitch de investimento do projeto. É uma
-stack separada e deliberada: enquanto o resto do repositório é Python, essa
-análise roda em **Julia** (`CSV.jl`, `DataFrames.jl`, `Plots.jl`), isolada em
-seu próprio ambiente (`Project.toml`/`Manifest.toml`).
-
-- Relatório completo, com a proveniência de cada número (oficial, calculado
-  por nós, ou estimativa de terceiros) e a estrutura do pitch de investimento:
-  [`analise_mercado_streaming/RELATORIO.md`](analise_mercado_streaming/RELATORIO.md)
-- Notas de fonte e limitações por planilha:
-  [`analise_mercado_streaming/data/FONTES.md`](analise_mercado_streaming/data/FONTES.md)
-- Versão no site publicado: [Mercado de Streaming](https://lucas-av.github.io/Grupo-8-ResIA/mercado.html)
-- Como reproduzir: ver [`analise_mercado_streaming/README.md`](analise_mercado_streaming/README.md)
-  (resumo: `julia setup.jl && julia analise_mercado.jl`)
-
-## Arquitetura do agente conversacional (Proposta B)
-
-O time decidiu a arquitetura do agente conversacional que vai consumir o
-`dataset.csv`: um pipeline em etapas (roteador determinístico → extração
-estruturada via LLM → busca determinística → geração guiada), com
-integração completa a Spotify OAuth para personalizar recomendações a
-partir do histórico do usuário. Dois documentos de referência cobrem essa
-arquitetura ponta a ponta:
-
-- [`docs/PIPELINE_AGENTE_PROPOSTA_B.md`](docs/PIPELINE_AGENTE_PROPOSTA_B.md)
-  — especificação completa: ciclo de vida do agente, fluxo Spotify OAuth
-  (PKCE), contratos de dados entre componentes, pipeline de um turno de
-  conversa passo a passo, casos de uso, edge cases e plano de testes.
-- [`docs/BACKLOG_JIRA_PROPOSTA_B.md`](docs/BACKLOG_JIRA_PROPOSTA_B.md) —
-  o mesmo escopo reorganizado em épicos e tickets prontos para o Kanban
-  do Jira, com prioridade, tamanho, dependências e referência à seção
-  técnica de cada item.
-
-## Análises disponíveis
-
-- **`genre_popularity.png`** — popularidade média por gênero, em barras
-  ranqueadas. Gênero mais popular: *chill* (53,7 de popularidade média).
-- **`genre_energy_dance.png`** — dispersão energia × dançabilidade, um ponto
-  por gênero. Mais energético: *death-metal* (0,93); menos energético:
-  *classical* (0,19); mais dançável: *chicago-house* (0,77).
-- **`genre_mode.png`** — proporção de faixas em escala maior (mode 1) vs.
-  menor (mode 0) por gênero. Maior predominância de escala maior: *country*
-  (89%); maior predominância de escala menor: *deep-house* (54%).
-- **`popularity_occurrences.png`** — relação entre popularidade média e
-  quantidade de faixas do artista na base (proxy de volume de catálogo).
-- **`dataset_profile.json` / `artist_track_distribution.png` /
-  `album_track_distribution.png`** — visão geral do dataset: contagem de
-  faixas, artistas, álbuns e gêneros, faixas duplicadas entre gêneros, e
-  distribuição de faixas por artista/álbum.
-- **`correlation_heatmap.png`** — correlação de Pearson entre popularidade,
-  duração e as 9 features de áudio contínuas.
-
-## Bibliotecas
-
-| Biblioteca | O que é | Para que serve neste projeto |
-|---|---|---|
-| [pandas](https://pandas.pydata.org/) | Biblioteca de manipulação e análise de dados tabulares (DataFrames) | Ler o `data/processed/dataset.csv`, agrupar por coluna/gênero e calcular médias/contagens (`scripts/group_occurrences.py`, `site/build_site.py`); carregar e normalizar o dataset pro motor de recomendação (`agente_conversacional/recomendacao/dataset.py`) |
-| [matplotlib](https://matplotlib.org/) | Biblioteca de geração de gráficos estáticos | Gerar os PNGs das análises (`scripts/plot_genre_charts.py`, `scripts/plot_genre_mode.py`, `scripts/plot_popularity_occurrences.py`) |
-| [adjustText](https://github.com/Phlya/adjustText) | Reposiciona rótulos de texto em gráficos matplotlib para evitar sobreposição | Afastar os rótulos de gênero que se sobrepunham no scatter de energia × dançabilidade (`genre_energy_dance.png`) |
-| [Jinja2](https://jinja.palletsprojects.com/) | Motor de templates para gerar texto/HTML a partir de dados | Renderizar as páginas HTML do site (`site/build_site.py` + `site/templates/`) |
-| [pytest](https://docs.pytest.org/) | Framework de testes automatizados | Rodar os testes do repositório (`tests/`) |
-| [JupyterLab](https://jupyterlab.readthedocs.io/) | Ambiente de notebooks interativos | Rodar `analise_exploratoria.ipynb`, o notebook que concentra a EDA |
-
-## Como reproduzir
-
-```bash
-pip install -r requirements.txt
-python scripts/group_occurrences.py           # gera os CSVs agregados em data/
-python scripts/plot_genre_charts.py           # gera images/genre_popularity.png e images/genre_energy_dance.png
-python scripts/plot_genre_mode.py             # gera images/genre_mode.png
-python scripts/plot_popularity_occurrences.py # gera images/popularity_occurrences.png
-python scripts/profile_dataset.py             # gera arquivos de perfil em data/analytics/
-python scripts/plot_correlations.py           # gera correlation_heatmap.png e pares em data/analytics/
-python site/build_site.py                     # gera o site em site/dist/ (abrir site/dist/index.html)
-jupyter lab analise_exploratoria.ipynb        # abre o notebook de EDA (mesma logica, saida inline)
-```
-
-Testes: `pytest`
-
-## Demonstração do notebook
-
-O notebook de EDA está pronto para uma demonstração guiada, célula a célula. Veja as opções online e os comandos de verificação em [`docs/NOTEBOOK_DEMO.md`](docs/NOTEBOOK_DEMO.md). Para abrir e executar pelo navegador sem preparar ambiente local, use o [Binder](https://mybinder.org/v2/gh/Lucas-AV/Grupo-8-ResIA/HEAD?labpath=analise_exploratoria.ipynb).
-
-## Apresentação do MelodIA
-
-O material do Épico 11 está organizado em
-[`docs/apresentacao/`](docs/apresentacao/README.md). O pacote inclui o pitch de
-cinco minutos, a apresentação técnica de oito minutos, os dois decks em PPTX e
-PDF, o roteiro do vídeo e o guia de ensaio. A gravação/publicação do vídeo e o
-registro do ensaio permanecem como ações da equipe e não são marcados como
-concluídos antes de acontecerem.
-
-- [Pitch em PPTX](docs/apresentacao/pitch/MelodIA_Pitch.pptx) e
-  [PDF](docs/apresentacao/pitch/MelodIA_Pitch.pdf)
-- [Apresentação técnica em PPTX](docs/apresentacao/tecnica/MelodIA_Tecnica.pptx)
-  e [PDF](docs/apresentacao/tecnica/MelodIA_Tecnica.pdf)
-- [Roteiro do pitch](docs/apresentacao/ROTEIRO_PITCH.md) e
-  [roteiro técnico](docs/apresentacao/ROTEIRO_TECNICO.md)
-- [Roteiro do vídeo](docs/apresentacao/video/ROTEIRO_VIDEO.md) e
-  [guia de gravação](docs/apresentacao/video/GUIA_GRAVACAO.md)
-- [Guia de ensaio](docs/apresentacao/ENSAIO_GERAL.md) e
-  [registro de validação](docs/apresentacao/VALIDACAO.md)
-
 ## Roadmap
 
-- [x] Análise exploratória por gênero (popularidade, energia, dançabilidade, escala)
-- [x] Site GitHub Pages com dashboard interativo das análises publicado em https://lucas-av.github.io/Grupo-8-ResIA/
+- [x] Análise exploratória do dataset de faixas (popularidade, energia,
+      dançabilidade, escala) e dashboard publicado no GitHub Pages
 - [x] Análise de mercado (Julia) e pitch de investimento
-- [x] Arquitetura do agente conversacional definida (Proposta B) — ver
-      [`docs/PIPELINE_AGENTE_PROPOSTA_B.md`](docs/PIPELINE_AGENTE_PROPOSTA_B.md)
-      e backlog em [`docs/BACKLOG_JIRA_PROPOSTA_B.md`](docs/BACKLOG_JIRA_PROPOSTA_B.md)
-- [x] Épico 0 — Infraestrutura de LLM implementada e testada (Ollama +
-      backend Claude alternativo, health-check, logística de rede da demo) —
-      ver [`agente_conversacional/`](agente_conversacional/)
-- [x] Épico 1 — Motor de recomendação (`recomendacao/`): dataset normalizado,
-      índice de similaridade, `buscar_recomendacoes` completa, diversidade/
-      cobertura, fallback via Spotify Search API quando o catálogo local não
-      cobre o pedido
-- [x] Épico 2 — Pipeline conversacional (roteador determinístico → extração
-      via LLM → busca → geração/auditoria), integrado ao `POST /chat` com
-      fallback seguro e testes ponta a ponta
-- [x] Épico 3 — Backend/API de sessões (`POST /session`, `POST /chat`,
-      `GET /chat/historico`) — ver
-      [`agente_conversacional/docs/KAN-8_BACKEND_API.md`](agente_conversacional/docs/KAN-8_BACKEND_API.md)
-- [x] Épico 4 — Frontend do chat (tela, cards de faixa, indicador de
-      processando, login com Spotify) — falta só o fluxo de logout (4.5)
-- [x] Épico 5 — Integração Spotify OAuth completa: login PKCE, tokens
-      criptografados, matching de histórico com o dataset local, perfil de
-      gosto (centróide) injetado na recomendação
-- [x] Épico 8 — Infra de projeto: CORS, tratamento de erro global, CI
-      (pytest em todo push/PR), rate limiter pronto (falta só ligar no
-      `/chat`)
-- [x] Épico 12 — Funcionalidades extras: criar playlist real no Spotify a
-      partir da recomendação, endpoint de recomendação sem depender do LLM,
-      dark mode, landing page do projeto
-- [ ] Modelagem do agente de recomendação (conteúdo/colaborativo/híbrido)
-- [ ] Avaliação com dataset complementar de interação/avaliação de usuários
-      (pesquisa de hábitos musicais roteirizada em `docs/pesquisa/`, ainda
-      não publicada/coletada)
+- [x] Arquitetura do agente conversacional definida (Proposta B)
+- [x] Épico 0 — Infraestrutura de LLM (Ollama local + backend Claude
+      alternativo, health-check)
+- [x] Épico 1 — Motor de recomendação por similaridade de cosseno
+- [x] Épico 2 — Pipeline conversacional (roteador → extração → busca →
+      geração/auditoria)
+- [x] Épico 3 — Backend/API de sessões (`/session`, `/chat`, `/chat/historico`)
+- [x] Épico 4 — Frontend do chat — 11 de 12 tickets (falta só o fluxo de
+      logout, 4.5)
+- [x] Épico 5 — Integração Spotify OAuth completa (login PKCE, tokens
+      criptografados, histórico, perfil de gosto)
+- [x] Épico 8 — Infra de projeto (CORS, erro global, CI) — falta só ligar
+      o rate limiter pronto na rota `/chat` (8.4) e publicar em hosting
+      real (8.7, opcional)
+- [x] Épico 12 — Salvar playlist no Spotify, endpoint sem LLM, dark mode,
+      landing page
+- [x] Épico 13 — Painel "Explorar Spotify" completo (busca, player,
+      lançamentos, playlists, seguindo, meus dados) + login por QR code
+- [x] Épico 15 — Validação do pipeline ponta a ponta com Ollama real
+      (falta só o checklist manual que depende de login numa conta
+      Spotify real)
+- [ ] Renomear o repositório GitHub em si pra **SyntonIA** (URL/link, ação
+      manual)
+- [ ] Rodar `scripts/apresentacao/build_decks.ps1` pra regenerar o PPTX/PDF
+      do pitch e da técnica com o texto interno já atualizado pra SyntonIA
+      (arquivos e roteiros já renomeados; falta só o rebuild)
+- [ ] Modelagem de recomendação colaborativa/híbrida (hoje é baseada em
+      conteúdo/similaridade)
+- [ ] Avaliação com dataset complementar de interação/avaliação de
+      usuários (pesquisa de hábitos musicais roteirizada em
+      `docs/pesquisa/`, ainda não publicada/coletada)
 
 ## Licença
 

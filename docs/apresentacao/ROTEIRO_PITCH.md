@@ -1,12 +1,12 @@
 # Roteiro do pitch — 5 minutos
 
-O pitch apresenta o problema, mostra a oportunidade de mercado, demonstra o produto e explica como o MelodIA mantém as recomendações ligadas ao catálogo. O tempo total planejado é de 300 segundos.
+O pitch apresenta o problema, mostra a oportunidade de mercado, demonstra o produto e explica como o SyntonIA mantém as recomendações ligadas ao catálogo. O tempo total planejado é de 300 segundos.
 
 ## Distribuição de tempo
 
 | Slide | Tema | Tempo |
 | ---: | --- | ---: |
-| 1 | MelodIA | 10 s |
+| 1 | SyntonIA | 10 s |
 | 2 | Como você escolhe o que ouvir? | 15 s |
 | 3 | Descobrir música ainda dá trabalho | 20 s |
 | 4 | O Brasil cresce acima da média mundial | 25 s |
@@ -19,14 +19,14 @@ O pitch apresenta o problema, mostra a oportunidade de mercado, demonstra o prod
 | 11 | As músicas recomendadas precisam existir | 25 s |
 | 12 | Cada gênero tem um perfil diferente | 25 s |
 | 13 | O produto já funciona e pode evoluir | 20 s |
-| 14 | O que você pediria ao MelodIA? | 20 s |
+| 14 | O que você pediria ao SyntonIA? | 20 s |
 | **Total** |  | **300 s** |
 
 ## Slide a slide
 
-### 1. MelodIA — 10 segundos
+### 1. SyntonIA — 10 segundos
 
-“O MelodIA recebe um pedido em linguagem comum, encontra faixas reais e explica a recomendação.”
+“O SyntonIA recebe um pedido em linguagem comum, encontra faixas reais e explica a recomendação.”
 
 ### 2. Como você escolhe o que ouvir? — 15 segundos
 
@@ -42,7 +42,7 @@ O pitch apresenta o problema, mostra a oportunidade de mercado, demonstra o prod
 
 ### 5. A conversa como ponto de partida — 20 segundos
 
-“A pessoa escreve do seu jeito. O MelodIA entende o pedido, busca no catálogo e explica a resposta.”
+“A pessoa escreve do seu jeito. O SyntonIA entende o pedido, busca no catálogo e explica a resposta.”
 
 ### 6. Do pedido à recomendação — 20 segundos
 
@@ -81,9 +81,9 @@ Não acrescentar interpretações subjetivas aos números.
 
 “Hoje já temos conversa em linguagem comum, recomendações verificadas e um produto pronto para demonstração. O próximo passo é testar com pessoas reais, ouvir opiniões e melhorar a personalização.”
 
-### 14. O que você pediria ao MelodIA? — 20 segundos
+### 14. O que você pediria ao SyntonIA? — 20 segundos
 
-“O MelodIA transforma pedidos cotidianos em recomendações verificáveis. Convidamos vocês a experimentar o produto e compartilhar sua percepção. Obrigado.”
+“O SyntonIA transforma pedidos cotidianos em recomendações verificáveis. Convidamos vocês a experimentar o produto e compartilhar sua percepção. Obrigado.”
 
 ## Plano B
 
